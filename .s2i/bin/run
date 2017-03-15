@@ -1,0 +1,60 @@
+#!/bin/bash
+
+echo " -----> Running application run script."
+
+# Ensure we fail fast if there is a problem.
+
+set -eo pipefail
+
+# It is presumed the current working directory is where the application
+# code will reside, or at least that this directory is writable and we
+# can add our own files for hook scripts there. This would normally be
+# the HOME directory for the builder account.
+
+S2I_SOURCE_PATH=`pwd`
+export S2I_SOURCE_PATH
+
+# Now source the 'deploy_env' script from the '.s2i/action_hooks'
+# directory if it exists. This script allows a user to dynamically set
+# additional environment variables required by the deploy process. These
+# might for example be environment variables which tell an application
+# where files it requires are located. When we source the 'deploy_env'
+# script, any environment variables set by it will be automatically
+# exported. Note that we only source the 'deploy_env' script if it hasn't
+# already been run. It could have already been run from the shell login
+# environment.
+
+if [ x"S2I_MARKER_ENVIRON" != x"" ]; then
+    S2I_MARKER_ENVIRON=`date`
+    export S2I_MARKER_ENVIRON
+
+    if [ -f $S2I_SOURCE_PATH/.s2i/action_hooks/deploy_env ]; then
+        echo " -----> Running $S2I_SOURCE_PATH/.s2i/action_hooks/deploy_env"
+        S2I_SHELL_PWD=$PWD
+        set -a; . $S2I_SOURCE_PATH/.s2i/action_hooks/deploy_env; set +a
+        cd $S2I_SHELL_PWD
+    fi
+fi
+
+# Now run the 'deploy' hook from the '.s2i/action_hooks' directory if it
+# exists. This hook is to allow a user to run any final steps just before
+# the application is to be started. This can include running background
+# tasks.
+
+if [ -f $S2I_SOURCE_PATH/.s2i/action_hooks/deploy ]; then
+    if [ ! -x $S2I_SOURCE_PATH/.s2i/action_hooks/deploy ]; then
+        echo "WARNING: Script $S2I_SOURCE_PATH/.s2i/action_hooks/deploy not executable."
+    else
+        echo " -----> Running $S2I_SOURCE_PATH/.s2i/action_hooks/deploy"
+        $S2I_SOURCE_PATH/.s2i/action_hooks/deploy
+    fi
+fi
+
+# Now run the original 'run' script to start up the application. This
+# must be run using 'exec' so that the original 'run' script will take
+# over process ID 1. This is necessary so that the application will
+# receive signals properly.
+
+echo " -----> Running builder run script ($S2I_SCRIPTS_PATH/run)"
+
+exec $S2I_SCRIPTS_PATH/run

@@ -1,0 +1,36 @@
+#!/bin/bash
+
+# This is a 'pre_build' action hook script. This script must be
+# executable and will be run by the S2I process as the very first step.
+# This script can be used to install additional third party libraries
+# or packages that may be required by the build process. If the
+# 'pre_build' hook needs any files from the application source code, it
+# must grab them from the '/tmp/src' directory as they will only be
+# copied into place by the original S2I 'assemble' script later on in
+# the build process.
+
+set -eo pipefail
+
+# Dump out the initial set of environment variables.
+
+echo " -----> Initial environment variables set by builder image."
+
+env
+
+# Dump out the contents of the '/tmp/src' directory.
+
+echo " -----> Initial contents of the /tmp/src directory."
+
+ls -R /tmp/src
+
+# Dump out the name of the current working directory.
+
+echo " -----> Current working directory."
+
+pwd
+
+# Dump out the contents of the current working directory.
+
+echo " -----> Initial contents of the current working directory."
+
+ls -R .

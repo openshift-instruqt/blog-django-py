@@ -1,0 +1,16 @@
+# This is a 'deploy_env' action hook. This script will be executed
+# inline to the custom 'run' script as well as for any interactive shell
+# if so enabled. As it is executed inline, it doesn't need to start with
+# a '#!' line nor be marked as an executable file. This script will be
+# interpreted as if it is a 'bash' script. This script allows a user to
+# dynamically set additional environment variables required by the
+# deploy process. These might for example be environment variables which
+# tell an application where files it requires are located. When we
+# source the 'deploy_env' script, any environment variables set by it
+# will be automatically exported. Although principally intended for
+# setting environment variables, it can include other script logic, but
+# this should be avoided exception to the extent it is required to work
+# out what to set any environment variables to.
+
+DEPLOY_OVERRIDE_VALUE=value
+DEPLOY_DEFAULT_VALUE=${DEPLOY_DEFAULT_VALUE:-default}

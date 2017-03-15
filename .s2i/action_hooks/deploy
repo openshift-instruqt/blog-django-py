@@ -1,0 +1,39 @@
+#!/bin/bash
+
+# This is a 'deploy' action hook script. This script must be executable
+# and will be run by the S2I process just before the original S2I 'run'
+# script is run. This script is to allow a user to run any final steps
+# just before the application is to be started. This can include running
+# background tasks.
+
+set -eo pipefail
+
+# Dump out the set of environment variables which were used by the build.
+
+echo " -----> Environment variables set for the deployed application."
+
+env
+
+# Dump out the name of the current working directory.
+
+echo " -----> Current working directory."
+
+pwd
+
+# Run the application specific deploy steps for this project.
+
+if [ x"$DATABASE_URL" != x"" ]; then
+    echo " -----> Running Django database table migrations."
+
+    python manage.py migrate --noinput
+else
+    DJANGO_ADMIN_USERNAME=developer \
+       DJANGO_ADMIN_EMAIL=developer@example.com \
+       DJANGO_ADMIN_PASSWORD=developer `dirname $0`/setup
+fi
+
+# Dump out the contents of the current working directory.
+
+echo " -----> Contents of the current working directory after build run."
+
+ls -R .

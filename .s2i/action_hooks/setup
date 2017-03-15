@@ -1,0 +1,24 @@
+#!/bin/bash
+
+echo " -----> Running Django database table migrations."
+
+python manage.py migrate --noinput
+
+if [ x"$DJANGO_ADMIN_USERNAME" != x"" ]; then
+    echo " -----> Creating predefined Django super user"
+    (cat - | python manage.py shell) << !
+from django.contrib.auth.models import User;
+User.objects.create_superuser('$DJANGO_ADMIN_USERNAME',
+                  '$DJANGO_ADMIN_EMAIL',
+                  '$DJANGO_ADMIN_PASSWORD')
+!
+else
+    if (tty > /dev/null 2>&1); then
+        echo " -----> Running Django super user creation"
+        python manage.py createsuperuser
+    fi
+fi
+
+echo " -----> Pre-loading Django database with blog posts."
+
+python manage.py loaddata `dirname $0`/../../posts.json
