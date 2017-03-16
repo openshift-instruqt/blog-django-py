@@ -6,6 +6,13 @@
         <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
         <link href='//fonts.googleapis.com/css?family=Lalezar&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
         <link rel="stylesheet" href="{% static 'css/blog.css' %}">
+        {% if BLOG_BANNER_COLOR %}
+        <style>
+        .page-header {
+            background-color: {{BLOG_BANNER_COLOR}};
+        }
+        </style>
+        {% endif %}
     </head>
     <body>
         <div class="page-header">
