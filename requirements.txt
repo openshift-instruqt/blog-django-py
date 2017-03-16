@@ -3,3 +3,4 @@ dj_database_url
 mod_wsgi
 Pillow
 psycopg2
+requests

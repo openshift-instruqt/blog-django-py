@@ -1,0 +1,30 @@
+#!/bin/bash
+
+set -eo pipefail
+
+HERE=`dirname $0`
+
+ready() {
+    echo " -----> Starting liveness script."
+
+    # Check web server.
+
+    echo " -----> Checking server is working."
+
+    python $HERE/check-server.py
+
+    # Check database.
+
+    echo " -----> Checking database is working."
+
+    if [ x"$DATABASE_URL" != x"" ]; then
+        (cat - | python manage.py shell --plain) << !
+import runpy
+_ = runpy.run_path('$HERE/check-database.py')
+!
+    fi
+
+    echo " -----> Stopping liveness script."
+}
+
+ready 2>&1 | tee -a /proc/1/fd/1
