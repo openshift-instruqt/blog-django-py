@@ -122,6 +122,8 @@ oc set volume dc/blog-from-source-py --add --name=blog-images -t pvc --claim-siz
 
 When images are attached to a post, they do not appear on the top level page containing all posts, you need to drill down into the post to see it.
 
+Once you add a persistent volume, if it is of type ``RWO`` and you are not on a single node cluster, you should also not demonstrate scaling up the number of replicas as the volume will not be able to be mounted on multiple nodes at the same time.
+
 # Customising appearance
 
 To make it easy to demonstrate green/blue or a/b deployments, it is possible to modify the appearance of the blog application by setting environment variables. These are:
