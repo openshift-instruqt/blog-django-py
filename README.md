@@ -132,7 +132,7 @@ To make it easy to demonstrate green/blue or a/b deployments, it is possible to 
 To set environment variables from the command line, you can run:
 
 ```
-oc set env dc/blog-from-source-py BLOG_BANNER_COLOUR=blue
+oc set env dc/blog-from-source-py BLOG_BANNER_COLOR=blue
 ```
 
 Under the title on each page, the host name for the pod handling the request is also shown if disabling sticky sessions on routing, or using curl to show how requests or different users are automatically load balanced across instances when scaled up.
