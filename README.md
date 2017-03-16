@@ -129,6 +129,12 @@ To make it easy to demonstrate green/blue or a/b deployments, it is possible to 
 * ``BLOG_SITE_NAME`` - Sets the title for pages.
 * ``BLOG_BANNER_COLOR`` - Sets the color of the page banner.
 
+To set environment variables from the command line, you can run:
+
+```
+oc set env dc/blog-from-source-py BLOG_BANNER_COLOUR=blue
+```
+
 Under the title on each page, the host name for the pod handling the request is also shown if disabling sticky sessions on routing, or using curl to show how requests or different users are automatically load balanced across instances when scaled up.
 
 
