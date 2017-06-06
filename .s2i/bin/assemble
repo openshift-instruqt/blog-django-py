@@ -78,6 +78,12 @@ if [ -f $S2I_SOURCE_PATH/.s2i/action_hooks/build ]; then
     fi
 fi
 
+# Now fix up the permissions on the directories and files where the source
+# code was copied one last time to account for changes made from the users
+# 'build' hook.
+
+fix-permissions $S2I_SOURCE_PATH
+
 # Now fix up the shell login environment so it will trigger 'deploy_env'.
 
 if [ x"$S2I_BASH_ENV" != x"" ]; then
