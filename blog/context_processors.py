@@ -1,8 +1,8 @@
-import os
+from django.conf import settings
 
-BLOG_SITE_NAME = os.environ.get('BLOG_SITE_NAME', 'OpenShift Blog')
-BLOG_BANNER_COLOR = os.environ.get('BLOG_BANNER_COLOR', '')
-KUBE_POD_NAME = os.environ.get('HOSTNAME', 'localhost')
+BLOG_SITE_NAME = settings.BLOG_SITE_NAME
+BLOG_BANNER_COLOR = settings.BLOG_BANNER_COLOR
+KUBE_POD_NAME = settings.KUBE_POD_NAME
 
 def site_information(request):
     return {

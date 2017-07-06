@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/1.10/ref/settings/
 """
 
 import os
+import json
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -151,3 +152,23 @@ LOGGING = {
 }
 
 LOGIN_REDIRECT_URL = 'post_list'
+
+# Default settings for blog application.
+
+BLOG_SETTINGS = {}
+BLOG_SETTINGS_FILE = os.path.join(BASE_DIR, 'settings', 'blog.json')
+
+if os.path.exists(BLOG_SETTINGS_FILE):
+    with open(BLOG_SETTINGS_FILE) as fp:
+        BLOG_SETTINGS = json.load(fp)
+
+BLOG_SITE_NAME = 'OpenShift Blog'
+BLOG_SITE_NAME = BLOG_SETTINGS.get('BLOG_SITE_NAME', BLOG_SITE_NAME)
+BLOG_SITE_NAME = os.environ.get('BLOG_SITE_NAME', BLOG_SITE_NAME)
+
+BLOG_BANNER_COLOR = ''
+BLOG_BANNER_COLOR = BLOG_SETTINGS.get('BLOG_BANNER_COLOR', BLOG_BANNER_COLOR)
+BLOG_BANNER_COLOR = os.environ.get('BLOG_BANNER_COLOR', BLOG_BANNER_COLOR)
+
+KUBE_POD_NAME = 'localhost'
+KUBE_POD_NAME = os.environ.get('HOSTNAME', KUBE_POD_NAME)

@@ -139,4 +139,30 @@ oc set env dc/blog-from-source-py BLOG_BANNER_COLOR=blue
 
 Under the title on each page, the host name for the pod handling the request is also shown if disabling sticky sessions on routing, or using curl to show how requests or different users are automatically load balanced across instances when scaled up.
 
+# Demonstrating Config Maps
+
+In addition to being able to perform customisations using environment variables, use of a config map is also supported.
+
+The config map should be defined as a JSON data file. For example, save this as ``blog.json``.
+
+```
+{
+   "BLOG_SITE_NAME": "OpenShift Blog",
+   "BLOG_BANNER_COLOR": "black"
+}
+```
+
+The config map can be created using the command:
+
+```
+oc create configmap blog-settings --from-file=blog.json
+```
+
+and then mounted into the container using:
+
+```
+oc set volume dc/blog --add --name settings --mount-path /opt/app-root/src/settings --configmap-name blog-settings -t configmap
+```
+
+Even if a config map is used, environment variables, if defined for the same settings, will take precedence.
 
