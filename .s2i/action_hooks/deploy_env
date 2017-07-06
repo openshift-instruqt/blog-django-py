@@ -9,7 +9,7 @@
 # source the 'deploy_env' script, any environment variables set by it
 # will be automatically exported. Although principally intended for
 # setting environment variables, it can include other script logic, but
-# this should be avoided exception to the extent it is required to work
+# this should be avoided except to the extent it is required to work
 # out what to set any environment variables to.
 
 DEPLOY_OVERRIDE_VALUE=value
