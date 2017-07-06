@@ -21,4 +21,4 @@ fi
 
 echo " -----> Pre-loading Django database with blog posts."
 
-python manage.py loaddata `dirname $0`/../../posts.json
+python manage.py loaddata posts.json
