@@ -10,7 +10,7 @@ set -eo pipefail
 
 # Dump out the set of environment variables which were used by the build.
 
-echo " -----> Initial environment variables set by builder image."
+echo " -----> Environment variables set for build script."
 
 env
 
