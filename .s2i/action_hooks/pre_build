@@ -37,7 +37,7 @@ ls -lasR .
 
 # Ensure we are using the latest pip and wheel packages.
 
-pip install -U pip wheel
+pip install -U pip setuptools wheel
 
 # Restore the cache directory from an incremental build.
 
