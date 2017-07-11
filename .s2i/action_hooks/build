@@ -30,6 +30,12 @@ echo " -----> Creating directory for uploaded image files."
 
 mkdir -p media/images && chmod g+w media/images
 
+# Remove the pip cache directory and wheelhouse if they exists.
+
+echo " -----> Removing wheelhouse directory from final image."
+
+rm -rf /opt/app-root/src/.s2i/wheelhouse
+
 # Dump out the contents of the current working directory.
 
 echo " -----> Contents of the current working directory after build run."

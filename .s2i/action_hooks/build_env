@@ -13,3 +13,18 @@
 # to the extent it is required to work out what to set any environment
 # variables to.
 
+# If a cache directory exists, use that to trigger use of a cache
+# directory when running pip to install packages.
+
+if [ -d /opt/app-root/cache ]; then
+    PIP_CACHE_DIR=/opt/app-root/cache/pip
+    unset PIP_NO_CACHE_DIR
+fi
+
+# If a wheelhouse directory exists, configure pip to use it as a source
+# for pre-built packages. Ensure that pip is updated to the latest version
+# as older default pip version don't always work with wheels.
+
+if [ -d /opt/app-root/src/.s2i/wheelhouse ]; then
+    PIP_FIND_LINKS="$PIP_FIND_LINKS /opt/app-root/src/.s2i/wheelhouse"
+fi

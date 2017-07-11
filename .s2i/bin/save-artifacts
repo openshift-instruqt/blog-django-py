@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# Ensure a cache directory exists and has at least one file in it so that
+# S2I build process doesn't ignore it when injecting it into a new image.
+
+mkdir -p /opt/app-root/cache
+touch /opt/app-root/cache/.enabled
+
+tar -C /opt/app-root -cf - cache
