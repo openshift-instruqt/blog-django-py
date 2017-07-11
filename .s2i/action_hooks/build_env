@@ -13,5 +13,3 @@
 # to the extent it is required to work out what to set any environment
 # variables to.
 
-BUILD_OVERRIDE_VALUE=value
-BUILD_DEFAULT_VALUE=${BUILD_DEFAULT_VALUE:-default}
