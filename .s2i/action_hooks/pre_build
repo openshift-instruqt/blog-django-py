@@ -21,7 +21,7 @@ env
 
 echo " -----> Initial contents of the /tmp/src directory."
 
-ls -R /tmp/src
+ls -lasR /tmp/src
 
 # Dump out the name of the current working directory.
 
