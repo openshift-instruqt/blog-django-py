@@ -1,5 +1,5 @@
 #!/bin/bash
 
-pip install --no-cache-dir powershift-cli[image]
+pip install powershift-cli[image]
 
 exec powershift image assemble
