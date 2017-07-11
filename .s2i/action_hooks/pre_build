@@ -33,4 +33,4 @@ pwd
 
 echo " -----> Initial contents of the current working directory."
 
-ls -R .
+ls -lasR .

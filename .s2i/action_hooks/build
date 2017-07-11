@@ -34,4 +34,4 @@ mkdir -p media/images && chmod g+w media/images
 
 echo " -----> Contents of the current working directory after build run."
 
-ls -R .
+ls -lasR .
