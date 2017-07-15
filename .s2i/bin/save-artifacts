@@ -4,6 +4,6 @@
 # S2I build process doesn't ignore it when injecting it into a new image.
 
 mkdir -p /opt/app-root/cache
-touch /opt/app-root/cache/.enabled
+echo "Incremental Build" > /opt/app-root/cache/README.txt
 
 tar -C /opt/app-root -cf - cache

@@ -1,3 +1,15 @@
 #!/bin/bash
 
+set -eo pipefail
+
+# If a wheel directory is specified, the repository was used as input
+# to a wheelhouse build, to build Python wheels for required packages. In
+# this case fall through to executing the original 'run' script.
+
+if [ x"$PIP_WHEEL_DIR" != x"" ]; then
+    exec /usr/libexec/s2i/run
+fi
+
+# Run the deployment phase with support for action hooks.
+
 exec powershift image run
