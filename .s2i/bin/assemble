@@ -2,11 +2,11 @@
 
 set -eo pipefail
 
-# If a wheel directory is specified, the repository is being used as input
-# to a wheelhouse build, to build Python wheels for required packages. In
-# this case fall through to executing the original 'assemble' script.
+# If a wheelhouse cache directory exists, the repository is being used as
+# input to a wheelhouse build, to build Python wheels for required packages.
+# In this case fall through to executing the original 'assemble' script.
 
-if [ x"$PIP_WHEEL_DIR" != x"" ]; then
+if [ -d /opt/app-root/wheelhouse ]; then
     exec /usr/libexec/s2i/assemble
 fi
 

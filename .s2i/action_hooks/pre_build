@@ -43,7 +43,7 @@ pip install -U pip setuptools wheel
 
 if [ -d /tmp/artifacts/cache ]; then
     echo " -----> Restoring cache directory from incremental build."
-    mv /tmp/artifacts/cache /opt/app-root/cache
+    mv /tmp/artifacts/cache /opt/app-root/
 fi
 
 # If a wheelhouse directory has been provided, ensure that the cache
