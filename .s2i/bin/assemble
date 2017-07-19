@@ -7,7 +7,7 @@ set -eo pipefail
 # In this case fall through to executing the original 'assemble' script.
 
 if [ -d /opt/app-root/wheelhouse ]; then
-    exec /usr/libexec/s2i/assemble
+    exec /opt/app-root/s2i/assemble
 fi
 
 # Install 'powershift-cli[image]' package to add support for action hooks.
