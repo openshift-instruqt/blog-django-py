@@ -24,7 +24,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = 'w9mp-ntfm6b1k1!i3nx6kd)jehhnu=r)o)0d!s*rn&36dtquth'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
@@ -172,3 +172,11 @@ BLOG_BANNER_COLOR = os.environ.get('BLOG_BANNER_COLOR', BLOG_BANNER_COLOR)
 
 KUBE_POD_NAME = 'localhost'
 KUBE_POD_NAME = os.environ.get('HOSTNAME', KUBE_POD_NAME)
+
+# Enable DEBUG mode when mod_wsgi-express debugging enabled.
+
+if os.environ.get('MOD_WSGI_DEBUG_MODE'):
+    DEBUG = True
+
+if os.environ.get('MOD_WSGI_DEBUGGER_ENABLED'):
+    DEBUG_PROPAGATE_EXCEPTIONS = True
