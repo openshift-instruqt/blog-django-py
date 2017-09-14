@@ -1,0 +1,270 @@
+{
+    "kind": "Template",
+    "apiVersion": "v1",
+    "metadata": {
+        "name": "django-blog-testing-environment",
+	"annotations": {
+            "openshift.io/display-name": "Django Blog (Testing Environment)",
+	    "description": "Creates a blog site using Django. A local SQLite database is used. Requires that a single persistent volume be available. Configuration only suitable for testing environments. Cannot be scaled.",
+	    "tags": "quickstart,python,django",
+            "iconClass": "icon-python"
+	}
+    },
+    "parameters": [
+        {
+            "name": "APPLICATION_NAME",
+            "description": "The name of the blog site instance.",
+            "value": "blog",
+            "from": "[a-zA-Z0-9]",
+            "required": true
+        },
+        {
+            "name": "DATA_VOLUME_SIZE",
+            "description": "Size of the persistent volume for all data.",
+            "value": "1Gi",
+            "required": true
+        },
+        {
+            "name": "BLOG_SITE_MEMORY_LIMIT",
+            "description": "Amount of memory available to blog site.",
+            "value": "256Mi",
+            "required": true
+        },
+        {
+            "name": "BLOG_SITE_REPOSITORY",
+            "description": "The source repository containing the blog site code.",
+            "value": "https://github.com/openshift-katacoda/blog-django-py",
+            "required": true
+        },
+        {
+            "name": "PYTHON_VERSION",
+            "description": "The version of Python to run the blog site.",
+            "value": "3.5",
+            "required": true
+        }
+    ],
+    "objects": [
+        {
+            "kind": "ImageStream",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "${APPLICATION_NAME}-img",
+                "labels": {
+                    "app": "${APPLICATION_NAME}"
+                }
+            }
+        },
+        {
+            "kind": "BuildConfig",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "${APPLICATION_NAME}",
+                "labels": {
+                    "app": "${APPLICATION_NAME}"
+                }
+            },
+            "spec": {
+                "triggers": [
+                    {
+                        "type": "ConfigChange"
+                    },
+                    {
+                        "type": "ImageChange"
+                    }
+                ],
+                "source": {
+                    "type": "Git",
+                    "git": {
+                        "uri": "${BLOG_SITE_REPOSITORY}"
+                    }
+                },
+                "strategy": {
+                    "type": "Source",
+                    "sourceStrategy": {
+                        "from": {
+                            "kind": "ImageStreamTag",
+                            "namespace": "openshift",
+                            "name": "python:${PYTHON_VERSION}"
+                        }
+                    }
+                },
+                "output": {
+                    "to": {
+                        "kind": "ImageStreamTag",
+                        "name": "${APPLICATION_NAME}-img:latest"
+                    }
+                }
+            }
+        },
+        {
+            "kind": "DeploymentConfig",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "${APPLICATION_NAME}",
+                "labels": {
+                    "app": "${APPLICATION_NAME}"
+                }
+            },
+            "spec": {
+                "strategy": {
+                    "type": "Recreate"
+                },
+                "triggers": [
+                    {
+                        "type": "ConfigChange"
+                    },
+                    {
+                        "type": "ImageChange",
+                        "imageChangeParams": {
+                            "automatic": true,
+                            "containerNames": [
+                                "blog"
+                            ],
+                            "from": {
+                                "kind": "ImageStreamTag",
+                                "name": "${APPLICATION_NAME}-img:latest"
+                            }
+                        }
+                    }
+                ],
+                "replicas": 1,
+                "selector": {
+                    "app": "${APPLICATION_NAME}",
+                    "deploymentconfig": "${APPLICATION_NAME}"
+                },
+                "template": {
+                    "metadata": {
+                        "labels": {
+                            "app": "${APPLICATION_NAME}",
+                            "deploymentconfig": "${APPLICATION_NAME}"
+                        }
+                    },
+                    "spec": {
+                        "volumes": [
+                            {
+                                "name": "data",
+                                "persistentVolumeClaim": {
+                                    "claimName": "${APPLICATION_NAME}-data"
+                                }
+                            }
+                        ],
+                        "containers": [
+                            {
+                                "name": "blog",
+                                "image": "${APPLICATION_NAME}-img",
+                                "ports": [
+                                    {
+                                        "containerPort": 8080,
+                                        "protocol": "TCP"
+                                    }
+                                ],
+				"resources": {
+                                    "limits": {
+                                        "memory": "${BLOG_SITE_MEMORY_LIMIT}"
+				    }
+                                },
+				"readinessProbe": {
+				    "failureThreshold": 3,
+				    "httpGet": {
+					"path": "/",
+					"port": 8080,
+					"scheme": "HTTP"
+				    },
+				    "periodSeconds": 10,
+				    "successThreshold": 1,
+				    "timeoutSeconds": 1
+				},
+				"livenessProbe": {
+				    "failureThreshold": 3,
+				    "httpGet": {
+					"path": "/",
+					"port": 8080,
+					"scheme": "HTTP"
+				    },
+				    "periodSeconds": 10,
+				    "successThreshold": 1,
+				    "timeoutSeconds": 1
+				},
+                                "volumeMounts": [
+                                    {
+                                        "name": "data",
+                                        "mountPath": "/opt/app-root/data"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        {
+            "kind": "Service",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "${APPLICATION_NAME}",
+                "labels": {
+                    "app": "${APPLICATION_NAME}"
+                }
+            },
+            "spec": {
+                "ports": [
+                    {
+                        "name": "8080-tcp",
+                        "protocol": "TCP",
+                        "port": 8080,
+                        "targetPort": 8080
+                    }
+                ],
+                "selector": {
+                    "app": "${APPLICATION_NAME}",
+                    "deploymentconfig": "${APPLICATION_NAME}"
+                }
+            }
+        },
+        {
+            "kind": "Route",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "${APPLICATION_NAME}",
+                "labels": {
+                    "app": "${APPLICATION_NAME}"
+                }
+            },
+            "spec": {
+                "host": "",
+                "to": {
+                    "kind": "Service",
+                    "name": "${APPLICATION_NAME}",
+                    "weight": 100
+                },
+                "port": {
+                    "targetPort": 8080
+                },
+                "tls": {
+                    "termination": "edge",
+                    "insecureEdgeTerminationPolicy": "Redirect"
+                }
+            }
+        },
+        {
+            "kind": "PersistentVolumeClaim",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "${APPLICATION_NAME}-data",
+                "labels": {
+                    "app": "${APPLICATION_NAME}"
+                }
+            },
+            "spec": {
+                "accessModes": [
+                    "ReadWriteOnce"
+                ],
+                "resources": {
+                    "requests": {
+                        "storage": "${DATA_VOLUME_SIZE}"
+                    }
+                }
+            }
+        }
+    ]
+}
