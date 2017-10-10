@@ -19,4 +19,8 @@ if [ x"$MOD_WSGI_ENABLE_DEBUGGER" != x"" ]; then
     ARGS="$ARGS --enable-debugger"
 fi
 
+if [ x"$MOD_WSGI_ENABLE_WEBDAV" != x"" ]; then
+    ARGS="$ARGS --include configs/webdav.conf"
+fi
+
 exec python manage.py runmodwsgi $ARGS
