@@ -1,9 +1,11 @@
 #!/bin/bash
 
+PORT=${PORT:-8080}
+
 ARGS=""
 
 ARGS="$ARGS --log-to-terminal"
-ARGS="$ARGS --port 8080"
+ARGS="$ARGS --port $PORT"
 ARGS="$ARGS --document-root htdocs"
 ARGS="$ARGS --url-alias /media media"
 
