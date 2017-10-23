@@ -1,0 +1,466 @@
+{
+    "kind": "Template",
+    "apiVersion": "v1",
+    "metadata": {
+        "name": "postgresql-persistent-two-volumes",
+	"annotations": {
+            "openshift.io/display-name": "Django Blog (PostgreSQL / Two Volumes)",
+	    "description": "Creates a blog site using Django. A separate PostgreSQL database is deployed and used. Requires that two persistent volumes be available. Can only be scaled if ReadWriteMany persistent volumes are available.",
+	    "tags": "quickstart,python,django",
+            "iconClass": "icon-python"
+	}
+    },
+    "parameters": [
+        {
+            "name": "APPLICATION_NAME",
+            "description": "The name of the blog site instance.",
+            "value": "blog",
+            "from": "[a-zA-Z0-9]",
+            "required": true
+        },
+        {
+            "name": "BLOG_SITE_REPOSITORY",
+            "description": "The source repository containing the blog site code.",
+            "value": "https://github.com/openshift-katacoda/blog-django-py",
+            "required": true
+        },
+        {
+            "name": "BLOG_SITE_VOLUME_SIZE",
+            "description": "Size of the persistent volume for blog site data.",
+            "value": "1Gi",
+            "required": true
+        },
+        {
+            "name": "BLOG_SITE_VOLUME_TYPE",
+            "description": "Type of the persistent volume for blog site.",
+            "value": "ReadWriteOnce",
+            "required": true
+        },
+        {
+            "name": "BLOG_SITE_MEMORY_LIMIT",
+            "description": "Amount of memory available to blog site.",
+            "value": "256Mi",
+            "required": true
+        },
+        {
+            "name": "DATABASE_VOLUME_SIZE",
+            "description": "Size of the persistent volume for the database.",
+            "value": "1Gi",
+            "required": true
+        },
+        {
+            "name": "DATABASE_MEMORY_LIMIT",
+            "description": "Amount of memory available to the database.",
+            "value": "256Mi",
+            "required": true
+        },
+        {
+            "description": "The name of the database user.",
+            "name": "DATABASE_USERNAME",
+            "from": "user[a-f0-9]{8}",
+            "generate": "expression"
+        },
+        {
+            "description": "The password for the database user.",
+            "name": "DATABASE_PASSWORD",
+            "from": "[a-zA-Z0-9]{12}",
+            "generate": "expression"
+        },
+        {
+            "name": "POSTGRESQL_VERSION",
+            "description": "The version of the PostgreSQL database.",
+            "value": "9.5",
+            "required": true
+        },
+        {
+            "name": "PYTHON_VERSION",
+            "description": "The version of Python to run the blog site.",
+            "value": "3.5",
+            "required": true
+        }
+    ],
+    "objects": [
+        {
+            "kind": "ImageStream",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "${APPLICATION_NAME}-img",
+                "labels": {
+                    "app": "${APPLICATION_NAME}"
+                }
+            }
+        },
+        {
+            "kind": "BuildConfig",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "${APPLICATION_NAME}",
+                "labels": {
+                    "app": "${APPLICATION_NAME}"
+                }
+            },
+            "spec": {
+                "triggers": [
+                    {
+                        "type": "ConfigChange"
+                    },
+                    {
+                        "type": "ImageChange"
+                    }
+                ],
+                "source": {
+                    "type": "Git",
+                    "git": {
+                        "uri": "${BLOG_SITE_REPOSITORY}"
+                    }
+                },
+                "strategy": {
+                    "type": "Source",
+                    "sourceStrategy": {
+                        "from": {
+                            "kind": "ImageStreamTag",
+                            "namespace": "openshift",
+                            "name": "python:${PYTHON_VERSION}"
+                        }
+                    }
+                },
+                "output": {
+                    "to": {
+                        "kind": "ImageStreamTag",
+                        "name": "${APPLICATION_NAME}-img:latest"
+                    }
+                }
+            }
+        },
+        {
+            "kind": "DeploymentConfig",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "${APPLICATION_NAME}",
+                "labels": {
+                    "app": "${APPLICATION_NAME}"
+                }
+            },
+            "spec": {
+                "strategy": {
+                    "type": "Recreate"
+                },
+                "triggers": [
+                    {
+                        "type": "ConfigChange"
+                    },
+                    {
+                        "type": "ImageChange",
+                        "imageChangeParams": {
+                            "automatic": true,
+                            "containerNames": [
+                                "blog"
+                            ],
+                            "from": {
+                                "kind": "ImageStreamTag",
+                                "name": "${APPLICATION_NAME}-img:latest"
+                            }
+                        }
+                    }
+                ],
+                "replicas": 1,
+                "selector": {
+                    "app": "${APPLICATION_NAME}",
+                    "deploymentconfig": "${APPLICATION_NAME}"
+                },
+                "template": {
+                    "metadata": {
+                        "labels": {
+                            "app": "${APPLICATION_NAME}",
+                            "deploymentconfig": "${APPLICATION_NAME}"
+                        }
+                    },
+                    "spec": {
+                        "volumes": [
+                            {
+                                "name": "data",
+                                "persistentVolumeClaim": {
+                                    "claimName": "${APPLICATION_NAME}-blog-site-data"
+                                }
+                            }
+                        ],
+                        "containers": [
+                            {
+                                "name": "blog",
+                                "image": "${APPLICATION_NAME}-img",
+                                "ports": [
+                                    {
+                                        "containerPort": 8080,
+                                        "protocol": "TCP"
+                                    }
+                                ],
+				"resources": {
+                                    "limits": {
+                                        "memory": "${BLOG_SITE_MEMORY_LIMIT}"
+				    }
+                                },
+				"readinessProbe": {
+				    "failureThreshold": 3,
+				    "httpGet": {
+					"path": "/",
+					"port": 8080,
+					"scheme": "HTTP"
+				    },
+				    "periodSeconds": 10,
+				    "successThreshold": 1,
+				    "timeoutSeconds": 1
+				},
+				"livenessProbe": {
+				    "failureThreshold": 3,
+				    "httpGet": {
+					"path": "/",
+					"port": 8080,
+					"scheme": "HTTP"
+				    },
+				    "periodSeconds": 10,
+				    "successThreshold": 1,
+				    "timeoutSeconds": 1
+				},
+                                "env": [
+                                    {
+                                        "name": "DATABASE_URL",
+                                        "value": "postgres://${DATABASE_USERNAME}:${DATABASE_PASSWORD}@${APPLICATION_NAME}-db:5432/blog"
+                                    }
+                                ],
+                                "volumeMounts": [
+                                    {
+                                        "name": "data",
+                                        "mountPath": "/opt/app-root/data"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        {
+            "kind": "DeploymentConfig",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "${APPLICATION_NAME}-db",
+                "labels": {
+                    "app": "${APPLICATION_NAME}"
+                }
+            },
+            "spec": {
+                "strategy": {
+                    "type": "Recreate"
+                },
+                "triggers": [
+                    {
+                        "type": "ConfigChange"
+                    },
+                    {
+                        "type": "ImageChange",
+                        "imageChangeParams": {
+                            "automatic": true,
+                            "containerNames": [
+                                "postgresql"
+                            ],
+                            "from": {
+                                "kind": "ImageStreamTag",
+                                "namespace": "openshift",
+                                "name": "postgresql:${POSTGRESQL_VERSION}"
+                            }
+                        }
+                    }
+                ],
+                "replicas": 1,
+                "selector": {
+                    "app": "${APPLICATION_NAME}",
+                    "deploymentconfig": "${APPLICATION_NAME}-db"
+                },
+                "template": {
+                    "metadata": {
+                        "labels": {
+                            "app": "${APPLICATION_NAME}",
+                            "deploymentconfig": "${APPLICATION_NAME}-db"
+                        }
+                    },
+                    "spec": {
+                        "volumes": [
+                            {
+                                "name": "data",
+                                "persistentVolumeClaim": {
+                                    "claimName": "${APPLICATION_NAME}-postgresql-data"
+                                }
+                            }
+                        ],
+                        "containers": [
+                            {
+                                "name": "postgresql",
+                                "image": "postgresql",
+                                "ports": [
+                                    {
+                                        "containerPort": 5432,
+                                        "protocol": "TCP"
+                                    }
+                                ],
+				"resources": {
+                                    "limits": {
+                                        "memory": "${DATABASE_MEMORY_LIMIT}"
+				    }
+                                },
+				"readinessProbe": {
+				    "timeoutSeconds": 1,
+				    "initialDelaySeconds": 5,
+                                    "exec": {
+                                        "command": [ "/bin/sh", "-i", "-c",
+                                            "psql -h 127.0.0.1 -U $POSTGRESQL_USER -q -d $POSTGRESQL_DATABASE -c 'SELECT 1'"
+                                        ]
+                                    }
+				},
+				"livenessProbe": {
+				    "timeoutSeconds": 1,
+				    "initialDelaySeconds": 30,
+				    "tcpSocket": {
+				        "port": 5432
+				    }
+				},
+                                "env": [
+                                    {
+                                        "name": "POSTGRESQL_DATABASE",
+                                        "value": "blog"
+                                    },
+                                    {
+                                        "name": "POSTGRESQL_USER",
+                                        "value": "${DATABASE_USERNAME}"
+                                    },
+                                    {
+                                        "name": "POSTGRESQL_PASSWORD",
+                                        "value": "${DATABASE_PASSWORD}"
+                                    }
+                                ],
+                                "volumeMounts": [
+                                    {
+                                        "name": "data",
+                                        "mountPath": "/var/lib/pgsql/data"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        {
+            "kind": "Service",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "${APPLICATION_NAME}",
+                "labels": {
+                    "app": "${APPLICATION_NAME}"
+                }
+            },
+            "spec": {
+                "ports": [
+                    {
+                        "name": "8080-tcp",
+                        "protocol": "TCP",
+                        "port": 8080,
+                        "targetPort": 8080
+                    }
+                ],
+                "selector": {
+                    "app": "${APPLICATION_NAME}",
+                    "deploymentconfig": "${APPLICATION_NAME}"
+                }
+            }
+        },
+        {
+            "kind": "Service",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "${APPLICATION_NAME}-db",
+                "labels": {
+                    "app": "${APPLICATION_NAME}"
+                }
+            },
+            "spec": {
+                "ports": [
+                    {
+                        "name": "5432-tcp",
+                        "protocol": "TCP",
+                        "port": 5432,
+                        "targetPort": 5432
+                    }
+                ],
+                "selector": {
+                    "app": "${APPLICATION_NAME}",
+                    "deploymentconfig": "${APPLICATION_NAME}-db"
+                }
+            }
+        },
+        {
+            "kind": "Route",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "${APPLICATION_NAME}",
+                "labels": {
+                    "app": "${APPLICATION_NAME}"
+                }
+            },
+            "spec": {
+                "host": "",
+                "to": {
+                    "kind": "Service",
+                    "name": "${APPLICATION_NAME}",
+                    "weight": 100
+                },
+                "port": {
+                    "targetPort": 8080
+                },
+                "tls": {
+                    "termination": "edge",
+                    "insecureEdgeTerminationPolicy": "Redirect"
+                }
+            }
+        },
+        {
+            "kind": "PersistentVolumeClaim",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "${APPLICATION_NAME}-blog-site-data",
+                "labels": {
+                    "app": "${APPLICATION_NAME}"
+                }
+            },
+            "spec": {
+                "accessModes": [
+                    "${BLOG_SITE_VOLUME_TYPE}"
+                ],
+                "resources": {
+                    "requests": {
+                        "storage": "${BLOG_SITE_VOLUME_SIZE}"
+                    }
+                }
+            }
+        },
+        {
+            "kind": "PersistentVolumeClaim",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "${APPLICATION_NAME}-postgresql-data",
+                "labels": {
+                    "app": "${APPLICATION_NAME}"
+                }
+            },
+            "spec": {
+                "accessModes": [
+                    "ReadWriteOnce"
+                ],
+                "resources": {
+                    "requests": {
+                        "storage": "${DATABASE_VOLUME_SIZE}"
+                    }
+                }
+            }
+        }
+    ]
+}

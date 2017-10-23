@@ -2,9 +2,9 @@
     "kind": "Template",
     "apiVersion": "v1",
     "metadata": {
-        "name": "django-blog-testing-environment",
+        "name": "sqlite-persistent-one-volume",
 	"annotations": {
-            "openshift.io/display-name": "Django Blog (Testing Environment)",
+            "openshift.io/display-name": "Django Blog (SQLite / One Volume)",
 	    "description": "Creates a blog site using Django. A local SQLite database is used. Requires that a single persistent volume be available. Configuration only suitable for testing environments. Cannot be scaled.",
 	    "tags": "quickstart,python,django",
             "iconClass": "icon-python"
@@ -19,7 +19,7 @@
             "required": true
         },
         {
-            "name": "DATA_VOLUME_SIZE",
+            "name": "BLOG_SITE_VOLUME_SIZE",
             "description": "Size of the persistent volume for all data.",
             "value": "1Gi",
             "required": true
@@ -261,7 +261,7 @@
                 ],
                 "resources": {
                     "requests": {
-                        "storage": "${DATA_VOLUME_SIZE}"
+                        "storage": "${BLOG_SITE_VOLUME_SIZE}"
                     }
                 }
             }
