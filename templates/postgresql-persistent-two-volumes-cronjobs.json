@@ -88,6 +88,11 @@
                 "labels": {
                     "app": "${APPLICATION_NAME}"
                 }
+            },
+            "spec": {
+                "lookupPolicy": {
+                    "local": true
+                }
             }
         },
         {
@@ -476,11 +481,6 @@
                 "schedule": "*/5 * * * *",
                 "concurrencyPolicy": "Forbid",
                 "jobTemplate": {
-                    "metadata": {
-                        "annotations": {
-                            "alpha.image.policy.openshift.io/resolve-names": "*"
-                        }
-                    },
                     "spec": {
                         "template": {
                             "metadata": {
