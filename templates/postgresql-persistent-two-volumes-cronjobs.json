@@ -471,14 +471,14 @@
             "kind": "CronJob",
             "apiVersion": "batch/v2alpha1",
             "metadata": {
-                "name": "${APPLICATION_NAME}-clearsessions",
+                "name": "${APPLICATION_NAME}-hourly",
                 "labels": {
                     "app": "${APPLICATION_NAME}",
-                    "job": "${APPLICATION_NAME}-clearsessions"
+                    "job": "${APPLICATION_NAME}-hourly"
                 }
             },
             "spec": {
-                "schedule": "*/5 * * * *",
+                "schedule": "5 * * * *",
                 "concurrencyPolicy": "Forbid",
                 "jobTemplate": {
                     "spec": {
@@ -486,21 +486,19 @@
                             "metadata": {
                                 "labels": {
                                     "app": "${APPLICATION_NAME}",
-                                    "job": "${APPLICATION_NAME}-clearsessions"
+                                    "job": "${APPLICATION_NAME}-hourly"
                                 }
                             },
                             "spec": {
                                 "containers": [
                                     {
-                                        "name": "${APPLICATION_NAME}-clearsessions",
+                                        "name": "${APPLICATION_NAME}-hourly",
                                         "image": "${APPLICATION_NAME}-img",
                                         "command": [
                                             "powershift",
                                             "image",
-                                            "exec",
-                                            "python",
-                                            "manage.py",
-                                            "clearsessions"
+                                            "jobs",
+                                            "hourly"
                                         ],
                                         "env": [
                                             {
