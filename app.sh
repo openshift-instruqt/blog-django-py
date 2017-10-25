@@ -25,4 +25,8 @@ if [ x"$MOD_WSGI_ENABLE_WEBDAV" != x"" ]; then
     ARGS="$ARGS --include configs/webdav.conf"
 fi
 
+if [ x"$BLOG_ENABLE_CRON_JOBS" != x"" ]; then
+    ARGS="$ARGS --service-script cronjobs cronjobs.py"
+fi
+
 exec python manage.py runmodwsgi $ARGS
