@@ -1,3 +1,0 @@
-#!/bin/bash
-
-exec `dirname $0`/../.s2i/action_hooks/setup
