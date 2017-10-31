@@ -3,12 +3,12 @@
     "apiVersion": "v1",
     "metadata": {
         "name": "postgresql-persistent-two-volumes",
-	"annotations": {
+        "annotations": {
             "openshift.io/display-name": "Django Blog (PostgreSQL / Two Volumes)",
-	    "description": "Creates a blog site using Django. A separate PostgreSQL database is deployed and used. Requires that two persistent volumes be available. Can only be scaled if ReadWriteMany persistent volumes are available.",
-	    "tags": "quickstart,python,django",
+            "description": "Creates a blog site using Django. A separate PostgreSQL database is deployed and used. Requires that two persistent volumes be available. Can only be scaled if ReadWriteMany persistent volumes are available.",
+            "tags": "quickstart,python,django",
             "iconClass": "icon-python"
-	}
+        }
     },
     "parameters": [
         {
@@ -133,6 +133,20 @@
             }
         },
         {
+            "kind": "Secret",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "${APPLICATION_NAME}-secrets",
+                "labels": {
+                    "app": "${APPLICATION_NAME}"
+                }
+            },
+            "stringData": {
+                "DATABASE_USERNAME": "${DATABASE_USERNAME}",
+                "DATABASE_PASSWORD": "${DATABASE_PASSWORD}"
+            }
+        },
+        {
             "kind": "DeploymentConfig",
             "apiVersion": "v1",
             "metadata": {
@@ -194,37 +208,55 @@
                                         "protocol": "TCP"
                                     }
                                 ],
-				"resources": {
+                                "resources": {
                                     "limits": {
                                         "memory": "${BLOG_SITE_MEMORY_LIMIT}"
-				    }
+                                    }
                                 },
-				"readinessProbe": {
-				    "failureThreshold": 3,
-				    "httpGet": {
-					"path": "/",
-					"port": 8080,
-					"scheme": "HTTP"
-				    },
-				    "periodSeconds": 10,
-				    "successThreshold": 1,
-				    "timeoutSeconds": 1
-				},
-				"livenessProbe": {
-				    "failureThreshold": 3,
-				    "httpGet": {
-					"path": "/",
-					"port": 8080,
-					"scheme": "HTTP"
-				    },
-				    "periodSeconds": 10,
-				    "successThreshold": 1,
-				    "timeoutSeconds": 1
-				},
+                                "readinessProbe": {
+                                    "failureThreshold": 3,
+                                    "httpGet": {
+                                        "path": "/",
+                                        "port": 8080,
+                                        "scheme": "HTTP"
+                                    },
+                                    "periodSeconds": 10,
+                                    "successThreshold": 1,
+                                    "timeoutSeconds": 1
+                                },
+                                "livenessProbe": {
+                                    "failureThreshold": 3,
+                                    "httpGet": {
+                                        "path": "/",
+                                        "port": 8080,
+                                        "scheme": "HTTP"
+                                    },
+                                    "periodSeconds": 10,
+                                    "successThreshold": 1,
+                                    "timeoutSeconds": 1
+                                },
                                 "env": [
                                     {
+                                        "name": "DATABASE_USERNAME",
+                                        "valueFrom": {
+                                            "secretKeyRef": {
+                                                "name": "${APPLICATION_NAME}-secrets",
+                                                "key": "DATABASE_USERNAME"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "name": "DATABASE_PASSWORD",
+                                        "valueFrom": {
+                                            "secretKeyRef": {
+                                                "name": "${APPLICATION_NAME}-secrets",
+                                                "key": "DATABASE_PASSWORD"
+                                            }
+                                        }
+                                    },
+                                    {
                                         "name": "DATABASE_URL",
-                                        "value": "postgres://${DATABASE_USERNAME}:${DATABASE_PASSWORD}@${APPLICATION_NAME}-db:5432/blog"
+                                        "value": "postgres://$(DATABASE_USERNAME):$(DATABASE_PASSWORD)@${APPLICATION_NAME}-db:5432/blog"
                                     }
                                 ],
                                 "volumeMounts": [
@@ -302,27 +334,27 @@
                                         "protocol": "TCP"
                                     }
                                 ],
-				"resources": {
+                                "resources": {
                                     "limits": {
                                         "memory": "${DATABASE_MEMORY_LIMIT}"
-				    }
+                                    }
                                 },
-				"readinessProbe": {
-				    "timeoutSeconds": 1,
-				    "initialDelaySeconds": 5,
+                                "readinessProbe": {
+                                    "timeoutSeconds": 1,
+                                    "initialDelaySeconds": 5,
                                     "exec": {
                                         "command": [ "/bin/sh", "-i", "-c",
                                             "psql -h 127.0.0.1 -U $POSTGRESQL_USER -q -d $POSTGRESQL_DATABASE -c 'SELECT 1'"
                                         ]
                                     }
-				},
-				"livenessProbe": {
-				    "timeoutSeconds": 1,
-				    "initialDelaySeconds": 30,
-				    "tcpSocket": {
-				        "port": 5432
-				    }
-				},
+                                },
+                                "livenessProbe": {
+                                    "timeoutSeconds": 1,
+                                    "initialDelaySeconds": 30,
+                                    "tcpSocket": {
+                                        "port": 5432
+                                    }
+                                },
                                 "env": [
                                     {
                                         "name": "POSTGRESQL_DATABASE",
@@ -330,11 +362,21 @@
                                     },
                                     {
                                         "name": "POSTGRESQL_USER",
-                                        "value": "${DATABASE_USERNAME}"
+                                        "valueFrom": {
+                                            "secretKeyRef": {
+                                                "name": "${APPLICATION_NAME}-secrets",
+                                                "key": "DATABASE_USERNAME"
+                                            }
+                                        }
                                     },
                                     {
                                         "name": "POSTGRESQL_PASSWORD",
-                                        "value": "${DATABASE_PASSWORD}"
+                                        "valueFrom": {
+                                            "secretKeyRef": {
+                                                "name": "${APPLICATION_NAME}-secrets",
+                                                "key": "DATABASE_PASSWORD"
+                                            }
+                                        }
                                     }
                                 ],
                                 "volumeMounts": [
