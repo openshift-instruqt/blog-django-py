@@ -20,16 +20,17 @@ echo " -----> Current working directory."
 
 pwd
 
-# Run the application specific deploy steps for this project.
+# Run the application specific deploy steps for this project. If an
+# external database is being used, only perform the database migration
+# and do not run full setup. When external database is used the setup to
+# add super user and pre-load data would need to be run as manual step.
 
-if [ x"$DATABASE_URL" != x"" ]; then
-    echo " -----> Running Django database table migrations."
-
-    python manage.py migrate --noinput
+if [ x"$DATABASE_URL" != x"" -o -d /opt/app-root/secrets/database ]; then
+    powershift image migrate
 else
     DJANGO_ADMIN_USERNAME=developer \
        DJANGO_ADMIN_EMAIL=developer@example.com \
-       DJANGO_ADMIN_PASSWORD=developer `dirname $0`/setup
+       DJANGO_ADMIN_PASSWORD=developer powershift image setup
 fi
 
 # Dump out the contents of the current working directory.
