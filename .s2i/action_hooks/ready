@@ -27,4 +27,17 @@ _ = runpy.run_path('$HERE/check-database.py')
     echo " -----> Stopping readiness script."
 }
 
+function alarm
+{
+   (
+     sleep $1
+     ps -p $$ > /dev/null
+     if [ $? -eq 0 ] ; then
+       kill -TERM $$
+     fi
+   ) &
+}
+
+alarm 2
+
 ready 2>&1 | tee -a /proc/1/fd/1
