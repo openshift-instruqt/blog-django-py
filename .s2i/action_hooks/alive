@@ -38,6 +38,9 @@ function alarm
    ) &
 }
 
+# Abort after 2 seconds as timeouts on probe scripts do
+# not work due to lack of timeouts on running docker exec.
+
 alarm 2
 
 ready 2>&1 | tee -a /proc/1/fd/1
