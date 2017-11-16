@@ -20,7 +20,11 @@ from django.conf.urls.static import static
 
 from . import settings
 
+from . import healthz
+
 urlpatterns = [
+    url(r'^healthz/ready', healthz.ready),
+    url(r'^healthz/alive', healthz.alive),
     url(r'^admin/', admin.site.urls),
     url(r'', include('blog.urls')),
 ]
