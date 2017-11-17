@@ -37,4 +37,4 @@ fi
 
 echo " -----> Contents of the current working directory after build run."
 
-ls -lasR .
+ls -lasR . || true
