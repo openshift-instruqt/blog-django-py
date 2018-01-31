@@ -30,7 +30,7 @@ echo " -----> Creating directory for uploaded image files."
 
 mkdir -p media/images && chmod g+w media/images
 
-# Remove the pip cache directory and wheelhouse if they exists.
+# Remove the wheelhouse if it exists.
 
 echo " -----> Removing wheelhouse directory from final image."
 
