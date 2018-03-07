@@ -28,9 +28,11 @@ pwd
 if [ x"$DATABASE_URL" != x"" -o -d /opt/app-root/secrets/database ]; then
     powershift image migrate
 else
-    DJANGO_ADMIN_USERNAME=developer \
-       DJANGO_ADMIN_EMAIL=developer@example.com \
-       DJANGO_ADMIN_PASSWORD=developer powershift image setup
+    if [ ! -f /opt/app-root/src/db.sqlite3 ]; then
+        DJANGO_ADMIN_USERNAME=developer \
+           DJANGO_ADMIN_EMAIL=developer@example.com \
+           DJANGO_ADMIN_PASSWORD=developer powershift image setup
+    fi
 fi
 
 # Dump out the contents of the current working directory.
