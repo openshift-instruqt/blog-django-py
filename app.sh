@@ -19,7 +19,9 @@ if [ -f /opt/app-root/cert/tls.key ]; then
     NAMESPACE=`cat /var/run/secrets/kubernetes.io/serviceaccount/namespace`
     SERVICE=`echo $HOSTNAME | sed -e 's/^\(.*\)-[0-9]*-[a-z0-9]*$/\1/'`
 
-    ARGS="$ARGS --server-name $SERVICE.$NAMESPACE.svc"
+    MOD_WSGI_SERVER_NAME=${MOD_WSGI_SERVER_NAME:-$SERVICE.$NAMESPACE.svc}
+
+    ARGS="$ARGS --server-name $MOD_WSGI_SERVER_NAME"
     ARGS="$ARGS --server-alias '*'"
 fi
 
