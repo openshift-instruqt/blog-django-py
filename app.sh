@@ -1,6 +1,9 @@
 #!/bin/bash
 
+set -x
+
 PORT=${PORT:-8080}
+SSL_PORT=${SSL_PORT:-8443}
 
 ARGS=""
 
@@ -8,6 +11,17 @@ ARGS="$ARGS --log-to-terminal"
 ARGS="$ARGS --port $PORT"
 ARGS="$ARGS --document-root htdocs"
 ARGS="$ARGS --url-alias /media media"
+
+if [ -f /opt/app-root/cert/tls.key ]; then
+    ARGS="$ARGS --ssl-port $SSL_PORT"
+    ARGS="$ARGS --ssl-certificate /opt/app-root/cert/tls"
+
+    NAMESPACE=`cat /var/run/secrets/kubernetes.io/serviceaccount/namespace`
+    SERVICE=`echo $HOSTNAME | sed -e 's/^\(.*\)-[0-9]*-[a-z0-9]*$/\1/'`
+
+    ARGS="$ARGS --server-name $SERVICE.$NAMESPACE.svc"
+    ARGS="$ARGS --server-alias '*'"
+fi
 
 if [ x"$MOD_WSGI_PROCESSES" != x"" ]; then
     ARGS="$ARGS --processes $MOD_WSGI_PROCESSES"
