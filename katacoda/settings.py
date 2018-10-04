@@ -122,10 +122,15 @@ elif os.environ.get('DATABASE_URL'):
     }
 
 else:
+    if os.path.isdir('/opt/app-root/data'):
+        DATABASE_DIR = '/opt/app-root/data'
+    else:
+        DATABASE_DIR = BASE_DIR
+
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+            'NAME': os.path.join(DATABASE_DIR, 'db.sqlite3'),
         }
     }
 
