@@ -20,6 +20,16 @@ echo " -----> Current working directory."
 
 pwd
 
+# If necessaary create the media directory if persistent volume being used.
+
+if [ -d /opt/app-root/data ]; then
+    if [ ! -d /opt/app-root/data/media/images ]; then
+        echo " -----> Creating directory for uploaded image files."
+
+        mkdir -p /opt/app-root/data/media/images
+    fi
+fi
+
 # Run the application specific deploy steps for this project. If an
 # external database is being used, only perform the database migration
 # and do not run full setup. When external database is used the setup to

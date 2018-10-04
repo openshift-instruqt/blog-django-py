@@ -16,6 +16,11 @@ import json
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+# If persistent volume mounted, use it for database and media.
+if os.path.isdir('/opt/app-root/data'):
+    DATA_DIR = '/opt/app-root/data'
+else:
+    DATA_DIR = BASE_DIR
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.10/howto/deployment/checklist/
@@ -122,15 +127,10 @@ elif os.environ.get('DATABASE_URL'):
     }
 
 else:
-    if os.path.isdir('/opt/app-root/data'):
-        DATABASE_DIR = '/opt/app-root/data'
-    else:
-        DATABASE_DIR = BASE_DIR
-
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': os.path.join(DATABASE_DIR, 'db.sqlite3'),
+            'NAME': os.path.join(DATA_DIR, 'db.sqlite3'),
         }
     }
 
@@ -175,7 +175,7 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_ROOT = os.path.join(DATA_DIR, 'media')
 
 LOGGING = {
     'version': 1,
