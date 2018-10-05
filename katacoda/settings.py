@@ -85,10 +85,6 @@ WSGI_APPLICATION = 'katacoda.wsgi.application'
 import dj_database_url
 
 if os.path.isdir('/opt/app-root/secrets/database'):
-    # Note that as we set what is read from the file as the default
-    # only, it can still be overridden by the 'DATABASE_URL' environment
-    # variable if that is also set.
-
     def database_url():
         try:
             from urllib.parse import urlparse
@@ -112,6 +108,23 @@ if os.path.isdir('/opt/app-root/secrets/database'):
         scheme = address.scheme
         hostname = address.hostname
         port = address.port
+
+        return '%s://%s:%s@%s:%s/%s' % (scheme, username, password,
+                hostname, port, database_name)
+
+    DATABASES = {
+        'default': dj_database_url.config(default=database_url(),
+                conn_max_age=600)
+    }
+
+elif os.environ.get('database-host'):
+    def database_url():
+        scheme = os.environ.get('database-scheme', 'postgres')
+        port = os.environ.get('database-port', '5432')
+        hostname = os.environ.get('database-host')
+        database_name = os.environ.get('database-name')
+        username = os.environ.get('database-user')
+        password = os.environ.get('database-password')
 
         return '%s://%s:%s@%s:%s/%s' % (scheme, username, password,
                 hostname, port, database_name)
