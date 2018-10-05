@@ -36,18 +36,22 @@ fi
 # When a persistent database is used the setup to add super user and
 # pre-load data would need to be run as manual step.
 
-if [ x"$DATABASE_URL" != x"" -o -d /opt/app-root/secrets/database ]; then
+if [ x"$DATABASE_HOST" != x"" ]; then
     powershift image migrate
 else
-    if [ -d /opt/app-root/data ]; then
-        if [ ! -f /opt/app-root/data/db.sqlite3 ]; then
-           powershift image migrate
-        fi
+    if [ x"$DATABASE_URL" != x"" -o -d /opt/app-root/secrets/database ]; then
+        powershift image migrate
     else
-        if [ ! -f /opt/app-root/src/db.sqlite3 ]; then
-            DJANGO_ADMIN_USERNAME=developer \
-               DJANGO_ADMIN_EMAIL=developer@example.com \
-               DJANGO_ADMIN_PASSWORD=developer powershift image setup
+        if [ -d /opt/app-root/data ]; then
+            if [ ! -f /opt/app-root/data/db.sqlite3 ]; then
+               powershift image migrate
+            fi
+        else
+            if [ ! -f /opt/app-root/src/db.sqlite3 ]; then
+                DJANGO_ADMIN_USERNAME=developer \
+                   DJANGO_ADMIN_EMAIL=developer@example.com \
+                   DJANGO_ADMIN_PASSWORD=developer powershift image setup
+            fi
         fi
     fi
 fi

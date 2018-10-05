@@ -17,7 +17,7 @@ ready() {
 
     echo " -----> Checking database is working."
 
-    if [ x"$DATABASE_URL" != x"" ]; then
+    if [ x"$DATABASE_URL" != x"" -o x"$DATABASE_HOST" != x"" ]; then
         (cat - | python manage.py shell --plain) << !
 import runpy
 _ = runpy.run_path('$HERE/check-database.py')
