@@ -117,14 +117,14 @@ if os.path.isdir('/opt/app-root/secrets/database'):
                 conn_max_age=600)
     }
 
-elif os.environ.get('database-host'):
+elif os.environ.get('DATABASE_HOST'):
     def database_url():
-        scheme = os.environ.get('database-scheme', 'postgres')
-        port = os.environ.get('database-port', '5432')
-        hostname = os.environ.get('database-host')
-        database_name = os.environ.get('database-name')
-        username = os.environ.get('database-user')
-        password = os.environ.get('database-password')
+        scheme = os.environ.get('DATABASE_SCHEME', 'postgres')
+        port = os.environ.get('DATABASE_PORT', '5432')
+        hostname = os.environ.get('DATABASE_HOST')
+        database_name = os.environ.get('DATABASE_NAME')
+        username = os.environ.get('DATABASE_USER')
+        password = os.environ.get('DATABASE_PASSWORD')
 
         return '%s://%s:%s@%s:%s/%s' % (scheme, username, password,
                 hostname, port, database_name)
