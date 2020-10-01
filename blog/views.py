@@ -36,6 +36,7 @@ def post_edit(request, pk):
             post.save()
             return redirect('post_detail', pk=post.pk)
         else:
+            # if form is invalid then it should be filled up with invalid inputs
             form = PostForm(request.POST, request.FILES, instance=post)
             return render(request, 'blog/post_edit.html', {'form': form})
     return render(request, 'blog/post_edit.html', {'form': form})
